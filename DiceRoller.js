@@ -14,12 +14,14 @@ const MAIN_STATS = {
   [CLASSES.THIEF]: 'DEX'
 };
 
-const PERFECT_ROLL = 13; // Godlike perfect roll
+const PERFECT_ROLL = 13;
+const MIN_STAT = 4;
+const MAX_STAT = 13;
+const MAX_TOTAL_STATS = 25; // 13 + 4 + 4 + 4
 
 class DiceRoller {
   constructor() {
     this.perfectRolls = {}; // Track perfect rolls per class
-    this.currentRoll = null;
     this.rollHistory = [];
     
     // Initialize perfect roll counters
@@ -29,79 +31,107 @@ class DiceRoller {
   }
 
   /**
-   * Roll a single dice (1-13 range for MapleStory stats)
+   * Roll a single stat (4-13 range for MapleStory stats)
    */
-  rollDice() {
-    return Math.floor(Math.random() * 13) + 1; // 1-13
+  rollStat() {
+    return Math.floor(Math.random() * (MAX_STAT - MIN_STAT + 1)) + MIN_STAT; // 4-13
   }
 
   /**
-   * Roll all stats for a given class
-   * Returns array of rolls: [STR/INT/DEX roll, other stats...]
+   * Roll all stats (STR, DEX, INT, LUK)
+   * Returns object with all 4 stats
    */
-  rollStats(mainStatRoll = null) {
+  rollStats() {
     const stats = {
-      HP: this.rollDice(),
-      MP: this.rollDice(),
-      STR: this.rollDice(),
-      DEX: this.rollDice(),
-      INT: this.rollDice(),
-      LUK: this.rollDice()
+      STR: this.rollStat(),
+      DEX: this.rollStat(),
+      INT: this.rollStat(),
+      LUK: this.rollStat()
     };
-
-    // If mainStatRoll is provided, use it; otherwise roll normally
-    if (mainStatRoll !== null) {
-      stats.mainStat = mainStatRoll;
-    }
 
     return stats;
   }
 
   /**
-   * Simulate rolling until a perfect roll (13) on main stat
-   * @param {string} className - Which class to roll for
-   * @returns {object} Result with all rolls until perfect, number of attempts
+   * Calculate total of all stats
    */
-  rollUntilPerfect(className) {
-    if (!Object.values(CLASSES).includes(className)) {
-      throw new Error(`Invalid class: ${className}. Valid classes: ${Object.values(CLASSES).join(', ')}`);
+  calculateTotal(stats) {
+    return stats.STR + stats.DEX + stats.INT + stats.LUK;
+  }
+
+  /**
+   * Determine which class got the perfect roll based on main stats
+   * @param {object} stats - The rolled stats
+   * @returns {string|null} - Class name or null if no perfect roll
+   */
+  getClassWithPerfectRoll(stats) {
+    if (stats.STR === PERFECT_ROLL) {
+      // Both Warrior and Pirate have STR, but we only have Warrior
+      return CLASSES.WARRIOR;
     }
+    if (stats.INT === PERFECT_ROLL) {
+      return CLASSES.MAGICIAN;
+    }
+    if (stats.DEX === PERFECT_ROLL) {
+      // Both Bowman and Thief have DEX - randomly assign
+      return Math.random() < 0.5 ? CLASSES.BOWMAN : CLASSES.THIEF;
+    }
+    return null;
+  }
 
-    const mainStat = MAIN_STATS[className];
-    const rolls = [];
+  /**
+   * Roll until any class gets a perfect roll (13) on their main stat
+   * @returns {object} Result with stats, class, attempts, total, and timestamp
+   */
+  rollUntilPerfect() {
     let attempts = 0;
-    let mainStatRoll = 0;
+    let stats = null;
+    let perfectClass = null;
 
-    // Keep rolling until we get a 13 on the main stat
-    while (mainStatRoll !== PERFECT_ROLL) {
-      mainStatRoll = this.rollDice();
+    // Keep rolling until we get a perfect roll on any main stat
+    while (!perfectClass) {
+      stats = this.rollStats();
       attempts++;
-
-      const stats = this.rollStats();
-      stats[mainStat] = mainStatRoll; // Set the main stat roll
-      rolls.push({
-        attempt: attempts,
-        stats: stats,
-        isPerfect: mainStatRoll === PERFECT_ROLL
-      });
+      perfectClass = this.getClassWithPerfectRoll(stats);
     }
 
     // Increment perfect roll counter for this class
-    this.perfectRolls[className]++;
+    this.perfectRolls[perfectClass]++;
+
+    const total = this.calculateTotal(stats);
 
     const result = {
-      class: className,
-      mainStat: mainStat,
-      totalAttempts: attempts,
-      allRolls: rolls,
-      perfectRoll: rolls[rolls.length - 1],
+      stats: stats,
+      class: perfectClass,
+      mainStat: MAIN_STATS[perfectClass],
+      attempts: attempts,
+      total: total,
+      maxPossible: MAX_TOTAL_STATS,
       timestamp: new Date().toISOString()
     };
 
     this.rollHistory.push(result);
-    this.currentRoll = result;
 
     return result;
+  }
+
+  /**
+   * Roll multiple times until target perfect rolls is reached
+   * @param {number} targetPerfectRolls - Number of perfect rolls to achieve
+   * @returns {array} Array of all results
+   */
+  rollUntilTarget(targetPerfectRolls) {
+    const results = [];
+    let currentPerfectCount = Object.values(this.perfectRolls).reduce((a, b) => a + b, 0);
+    const targetTotal = currentPerfectCount + targetPerfectRolls;
+
+    while (currentPerfectCount < targetTotal) {
+      const result = this.rollUntilPerfect();
+      results.push(result);
+      currentPerfectCount++;
+    }
+
+    return results;
   }
 
   /**
@@ -116,17 +146,10 @@ class DiceRoller {
   }
 
   /**
-   * Get the last roll result
-   */
-  getLastRoll() {
-    return this.currentRoll;
-  }
-
-  /**
    * Get roll history
    */
-  getRollHistory(limit = 10) {
-    return this.rollHistory.slice(-limit);
+  getRollHistory() {
+    return this.rollHistory;
   }
 
   /**
@@ -134,7 +157,6 @@ class DiceRoller {
    */
   reset() {
     this.perfectRolls = {};
-    this.currentRoll = null;
     this.rollHistory = [];
 
     Object.values(CLASSES).forEach(className => {
@@ -150,4 +172,4 @@ class DiceRoller {
   }
 }
 
-export { DiceRoller, CLASSES, MAIN_STATS, PERFECT_ROLL };
+export { DiceRoller, CLASSES, MAIN_STATS, PERFECT_ROLL, MAX_TOTAL_STATS };
