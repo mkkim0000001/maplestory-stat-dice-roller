@@ -92,6 +92,18 @@
             box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
         }
 
+        .btn-roll-x100 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-roll-x100:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(250, 112, 154, 0.4);
+        }
+
         .btn-reset {
             background: #ff6b6b;
             color: white;
@@ -348,6 +360,7 @@
         <div class="button-group">
             <button class="btn-roll" onclick="rollOnce()" id="rollBtn">Roll Once</button>
             <button class="btn-roll-x10" onclick="rollX10()" id="rollX10Btn">Roll x10</button>
+            <button class="btn-roll-x100" onclick="rollX100()" id="rollX100Btn">Roll x100</button>
             <button class="btn-reset" onclick="resetStats()">Reset</button>
         </div>
 
@@ -443,6 +456,29 @@
             }
         }
 
+        async function rollX100() {
+            const btn = document.getElementById('rollX100Btn');
+            btn.disabled = true;
+            btn.textContent = '🎲 Rolling x100...';
+
+            try {
+                const response = await fetch('/api/roll-x100', { method: 'POST' });
+                const data = await response.json();
+                
+                // Display the last roll
+                if (data.rolls.length > 0) {
+                    displayResult(data.rolls[data.rolls.length - 1]);
+                }
+                updateStats(data.stats);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error rolling dice');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Roll x100';
+            }
+        }
+
         function displayResult(roll) {
             const color = classColors[roll.class] || '#667eea';
             const resultContent = document.getElementById('resultContent');
@@ -467,7 +503,7 @@
                         </div>
                         <div class="stat-row">
                             <span class="stat-name">LUK:</span>
-                            <span class="stat-value">${roll.stats.LUK}</span>
+                            <span class="stat-value ${roll.stats.LUK === 13 ? 'perfect' : ''}">${roll.stats.LUK}</span>
                         </div>
                         <div class="total-stats">
                             <div class="total-stat-box">
