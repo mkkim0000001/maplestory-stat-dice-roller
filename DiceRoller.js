@@ -31,15 +31,22 @@ class DiceRoller {
 
   /**
    * Roll a single stat from the remaining pool
+   * Takes into account stats that still need to be rolled
    * @param {number} remainingPool - Points left to distribute
+   * @param {number} statsLeft - Number of stats still to be rolled (including this one)
    * @returns {number} Rolled stat value
    */
-  rollStat(remainingPool) {
-    const maxRoll = Math.min(13, remainingPool);
-    const minRoll = Math.min(4, remainingPool);
+  rollStat(remainingPool, statsLeft) {
+    // Reserve minimum 4 points for each stat that hasn't been rolled yet
+    const minForRemaining = (statsLeft - 1) * MIN_STAT;
+    const availableForThisStat = remainingPool - minForRemaining;
+    
+    // This stat can be between MIN_STAT and min(13, availableForThisStat)
+    const maxRoll = Math.min(13, availableForThisStat);
+    const minRoll = Math.min(MIN_STAT, availableForThisStat);
     
     if (minRoll > maxRoll) {
-      return remainingPool; // Return whatever is left if pool is less than min
+      return remainingPool; // Shouldn't happen, but safety check
     }
     
     return Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
@@ -48,6 +55,7 @@ class DiceRoller {
   /**
    * Roll all stats from a shared pool (total 25)
    * Stats are rolled in random order to avoid bias
+   * Each stat is guaranteed to be at least 4
    */
   rollStats() {
     let remainingPool = TOTAL_STAT_POOL;
@@ -63,14 +71,18 @@ class DiceRoller {
     const shuffledStats = statNames.sort(() => Math.random() - 0.5);
 
     // Roll stats in random order
-    for (let i = 0; i < shuffledStats.length - 1; i++) {
+    for (let i = 0; i < shuffledStats.length; i++) {
       const statName = shuffledStats[i];
-      stats[statName] = this.rollStat(remainingPool);
-      remainingPool -= stats[statName];
+      const statsLeft = shuffledStats.length - i;
+      
+      if (i === shuffledStats.length - 1) {
+        // Last stat gets whatever is left
+        stats[statName] = remainingPool;
+      } else {
+        stats[statName] = this.rollStat(remainingPool, statsLeft);
+        remainingPool -= stats[statName];
+      }
     }
-
-    // Last stat gets whatever is left
-    stats[shuffledStats[3]] = remainingPool;
 
     return stats;
   }
