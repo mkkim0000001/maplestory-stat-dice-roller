@@ -1,0 +1,17 @@
+{
+  "name": "maplestory-stat-dice-roller",
+  "version": "1.0.0",
+  "description": "A stat dice roller for MapleStory that tracks perfect rolls per class",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": ["maplestory", "dice", "roller", "stat"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "readline": "builtin"
+  }
+}
