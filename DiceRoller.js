@@ -11,7 +11,7 @@ const MAIN_STATS = {
   [CLASSES.WARRIOR]: 'STR',
   [CLASSES.MAGICIAN]: 'INT',
   [CLASSES.BOWMAN]: 'DEX',
-  [CLASSES.THIEF]: 'DEX'
+  [CLASSES.THIEF]: 'LUK'
 };
 
 const PERFECT_ROLL = 13;
@@ -107,8 +107,10 @@ class DiceRoller {
       return CLASSES.MAGICIAN;
     }
     if (stats.DEX === PERFECT_ROLL) {
-      // Both Bowman and Thief have DEX - randomly assign
-      return Math.random() < 0.5 ? CLASSES.BOWMAN : CLASSES.THIEF;
+      return CLASSES.BOWMAN;
+    }
+    if (stats.LUK === PERFECT_ROLL) {
+      return CLASSES.THIEF;
     }
     return null;
   }
