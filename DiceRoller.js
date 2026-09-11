@@ -16,8 +16,7 @@ const MAIN_STATS = {
 
 const PERFECT_ROLL = 13;
 const MIN_STAT = 4;
-const MAX_STAT = 13;
-const MAX_TOTAL_STATS = 25; // 13 + 4 + 4 + 4
+const TOTAL_STAT_POOL = 25; // Total points to distribute
 
 class DiceRoller {
   constructor() {
@@ -31,23 +30,47 @@ class DiceRoller {
   }
 
   /**
-   * Roll a single stat (4-13 range for MapleStory stats)
+   * Roll a single stat from the remaining pool
+   * @param {number} remainingPool - Points left to distribute
+   * @returns {number} Rolled stat value
    */
-  rollStat() {
-    return Math.floor(Math.random() * (MAX_STAT - MIN_STAT + 1)) + MIN_STAT; // 4-13
+  rollStat(remainingPool) {
+    const maxRoll = Math.min(13, remainingPool);
+    const minRoll = Math.min(4, remainingPool);
+    
+    if (minRoll > maxRoll) {
+      return remainingPool; // Return whatever is left if pool is less than min
+    }
+    
+    return Math.floor(Math.random() * (maxRoll - minRoll + 1)) + minRoll;
   }
 
   /**
-   * Roll all stats (STR, DEX, INT, LUK)
-   * Returns object with all 4 stats
+   * Roll all stats from a shared pool (total 25)
+   * Stats are rolled in random order to avoid bias
    */
   rollStats() {
+    let remainingPool = TOTAL_STAT_POOL;
     const stats = {
-      STR: this.rollStat(),
-      DEX: this.rollStat(),
-      INT: this.rollStat(),
-      LUK: this.rollStat()
+      STR: 0,
+      DEX: 0,
+      INT: 0,
+      LUK: 0
     };
+
+    // Randomize order to avoid any stat getting advantage
+    const statNames = ['STR', 'DEX', 'INT', 'LUK'];
+    const shuffledStats = statNames.sort(() => Math.random() - 0.5);
+
+    // Roll stats in random order
+    for (let i = 0; i < shuffledStats.length - 1; i++) {
+      const statName = shuffledStats[i];
+      stats[statName] = this.rollStat(remainingPool);
+      remainingPool -= stats[statName];
+    }
+
+    // Last stat gets whatever is left
+    stats[shuffledStats[3]] = remainingPool;
 
     return stats;
   }
@@ -66,7 +89,6 @@ class DiceRoller {
    */
   getClassWithPerfectRoll(stats) {
     if (stats.STR === PERFECT_ROLL) {
-      // Both Warrior and Pirate have STR, but we only have Warrior
       return CLASSES.WARRIOR;
     }
     if (stats.INT === PERFECT_ROLL) {
@@ -106,7 +128,7 @@ class DiceRoller {
       mainStat: MAIN_STATS[perfectClass],
       attempts: attempts,
       total: total,
-      maxPossible: MAX_TOTAL_STATS,
+      maxPossible: TOTAL_STAT_POOL,
       timestamp: new Date().toISOString()
     };
 
@@ -172,4 +194,4 @@ class DiceRoller {
   }
 }
 
-export { DiceRoller, CLASSES, MAIN_STATS, PERFECT_ROLL, MAX_TOTAL_STATS };
+export { DiceRoller, CLASSES, MAIN_STATS, PERFECT_ROLL, TOTAL_STAT_POOL };
