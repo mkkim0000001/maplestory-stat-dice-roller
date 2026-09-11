@@ -1,19 +1,33 @@
 # MapleStory Stat Dice Roller
 
-A simulator for rolling stats in classic MapleStory, tracking perfect rolls (13 on main stat) per class.
+A beautiful web-based simulator for rolling stats in classic MapleStory, tracking perfect rolls (13 on main stat) per class.
 
 ## Features
 
-- 🎲 **Realistic Dice Rolling**: Simulates rolling stat dice (1-13 range) until achieving a perfect roll
-- 👥 **Multi-Class Support**: Roll for Warrior, Magician, Bowman, Thief, or Pirate
-- 📊 **Perfect Roll Tracking**: Automatically tracks and counts perfect rolls (13) on each class's main stat
-- 📜 **Roll History**: View detailed history of all attempts and rolls
-- 🎯 **Main Stat Focus**: Each class has a designated main stat:
-  - **Warrior**: STR
-  - **Magician**: INT
-  - **Bowman**: DEX
-  - **Thief**: DEX
-  - **Pirate**: STR
+- 🎲 **Realistic Dice Rolling**: Simulates rolling stat dice (4-13 range) until achieving a perfect roll (13)
+- 👥 **Auto-Class Assignment**: Automatically determines which class achieved the perfect roll based on which main stat rolled a 13
+- 📊 **Perfect Roll Tracking**: Tracks and displays perfect roll counts for each class with visual progress bars
+- 🎯 **Roll Until Perfect**: Keeps rolling until any class achieves a perfect roll (13) on their main stat
+- 🔟 **Roll x10**: Quick mode to roll 10 perfect rolls at once
+- 📱 **Beautiful UI**: Modern, responsive web interface with real-time statistics updates
+- ♻️ **Reset Function**: Clear all statistics and start fresh
+
+## How Stats Work
+
+Only **4 stats are rolled** (HP and MP are not rolled):
+- **STR** (Strength): 4-13
+- **DEX** (Dexterity): 4-13
+- **INT** (Intelligence): 4-13
+- **LUK** (Luck): 4-13
+
+### Class Main Stats
+
+- **Warrior**: STR (needs 13 STR for perfect)
+- **Magician**: INT (needs 13 INT for perfect)
+- **Bowman**: DEX (needs 13 DEX for perfect)
+- **Thief**: DEX (needs 13 DEX for perfect)*
+
+*When DEX rolls a 13, one of Bowman or Thief is randomly selected
 
 ## Installation
 
@@ -23,68 +37,66 @@ npm install
 
 ## Usage
 
-Run the application:
+Start the server:
 
 ```bash
 npm start
 ```
 
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `roll <class>` | Roll the specified class until a perfect roll (13) on main stat |
-| `stats` | Display perfect roll statistics for all classes |
-| `last` | View the last roll result with all attempts |
-| `history` | View recent roll history |
-| `classes` | List all available classes |
-| `reset` | Reset all statistics |
-| `help` | Display the help menu |
-| `exit` | Quit the program |
-
-### Examples
-
+Then open your browser to:
 ```
-> roll warrior
-> roll magician
-> stats
-> history
-> reset
+http://localhost:3000
 ```
 
-## How It Works
+### How to Use
 
-1. **Rolling Process**: When you request a roll for a class, the roller continuously rolls the main stat (and all other stats) until it gets a 13 on the main stat.
-2. **Perfect Roll**: Once a 13 is achieved, the perfect roll counter for that class increments by 1.
-3. **Tracking**: All attempts are recorded and can be viewed to see how many tries it took.
+1. **Roll Once** - Rolls until the first perfect roll (13) appears on any class's main stat
+2. **Roll x10** - Rolls 10 perfect rolls in succession (displays the last one)
+3. **Reset** - Clears all statistics and starts fresh
 
-## Example Output
+## What Each Button Does
 
-```
-🎲 Warrior - PERFECT ROLL ACHIEVED!
-Main Stat: STR
-Total Attempts: 47
-═══════════════════════════════════════════════════════════
+### 🎲 Roll Once
+- Continuously rolls all 4 stats until any main stat hits 13
+- Shows which class achieved the perfect roll
+- Displays all 4 stat values
+- Shows the number of attempts it took
+- Increments that class's perfect roll counter
 
-📜 Roll History:
-  Attempt 1: HP: 8, MP: 6, STR: 3, DEX: 11, INT: 5, LUK: 9
-  Attempt 2: HP: 12, MP: 4, STR: 7, DEX: 8, INT: 10, LUK: 2
-  ...
-  Attempt 47: HP: 5, MP: 9, STR: 13, DEX: 12, INT: 4, LUK: 7 ✨ PERFECT!
-```
+### 🔟 Roll x10
+- Performs "Roll Once" 10 times automatically
+- Updates the statistics with all 10 perfect rolls
+- Displays the final roll result
+- Great for quickly building up your statistics
 
-## Statistics Example
+### ↺ Reset
+- Clears all perfect roll counters back to 0
+- Clears the display
+- Asks for confirmation before resetting
 
-```
-📊 PERFECT ROLL STATISTICS
-Total Perfect Rolls: 12
-───────────────────────────────────────────────────────────
-  Warrior     : ████████ 8
-  Magician    : ██ 2
-  Bowman      : ██ 2
-  Thief       : 0
-  Pirate      : 0
-```
+## Example
+
+When you roll and get:
+- STR: 13
+- DEX: 8
+- INT: 5
+- LUK: 7
+
+**Warrior** is awarded 1 perfect roll because they achieved a perfect 13 on their main stat (STR).
+
+## UI Components
+
+- **Result Display**: Shows the last perfect roll with stats and attempt count
+- **Statistics Bar**: Visual progress bars showing perfect roll counts per class
+- **Total Counter**: Displays total perfect rolls across all classes
+
+## API Endpoints
+
+- `POST /api/roll` - Roll once until perfect
+- `POST /api/roll-x10` - Roll 10 perfect rolls
+- `GET /api/stats` - Get current statistics
+- `POST /api/reset` - Reset all statistics
+- `GET /api/history` - Get roll history
 
 ## License
 
