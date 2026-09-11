@@ -43,6 +43,16 @@ app.post('/api/roll-x10', (req, res) => {
   });
 });
 
+// Roll x100
+app.post('/api/roll-x100', (req, res) => {
+  const results = roller.rollUntilTarget(100);
+  const stats = roller.getPerfectRollStats();
+  res.json({
+    rolls: results,
+    stats: stats
+  });
+});
+
 // Reset statistics
 app.post('/api/reset', (req, res) => {
   roller.reset();
