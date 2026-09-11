@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapleStory Stat Dice Roller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-roll {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-roll:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-roll:active {
+            transform: translateY(0);
+        }
+
+        .btn-roll-x10 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-roll-x10:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-reset {
+            background: #ff6b6b;
+            color: white;
+            padding: 12px 25px;
+            font-size: 0.95em;
+        }
+
+        .btn-reset:hover {
+            background: #ee5a52;
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-empty {
+            text-align: center;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .result-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .result-stats {
+            flex: 1;
+        }
+
+        .result-class {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.2em;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-name {
+            font-weight: bold;
+            color: #333;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .stat-value.perfect {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: glow 1s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        .attempts {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .attempts-label {
+            color: #666;
+            display: block;
+            font-size: 0.8em;
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .attempts-value {
+            color: #667eea;
+            font-size: 2.5em;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        .stats-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .class-stat {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+
+        .class-stat.warrior {
+            border-left-color: #ff6b6b;
+        }
+
+        .class-stat.magician {
+            border-left-color: #4ecdc4;
+        }
+
+        .class-stat.bowman {
+            border-left-color: #ffe66d;
+        }
+
+        .class-stat.thief {
+            border-left-color: #95e1d3;
+        }
+
+        .class-name {
+            font-weight: bold;
+            min-width: 120px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .stat-bar {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .bar-fill {
+            height: 30px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: width 0.3s ease;
+        }
+
+        .class-stat.warrior .bar-fill {
+            background: linear-gradient(90deg, #ff6b6b, #ee5a52);
+        }
+
+        .class-stat.magician .bar-fill {
+            background: linear-gradient(90deg, #4ecdc4, #44a5a1);
+        }
+
+        .class-stat.bowman .bar-fill {
+            background: linear-gradient(90deg, #ffe66d, #ffda4a);
+        }
+
+        .class-stat.thief .bar-fill {
+            background: linear-gradient(90deg, #95e1d3, #6fc9b6);
+        }
+
+        .count {
+            min-width: 50px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #667eea;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .total-rolls {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 MapleStory Stat Roller</h1>
+        <p class="subtitle">Roll until perfection (13 on main stat)</p>
+
+        <div class="button-group">
+            <button class="btn-roll" onclick="rollOnce()" id="rollBtn">Roll Once</button>
+            <button class="btn-roll-x10" onclick="rollX10()" id="rollX10Btn">Roll x10</button>
+            <button class="btn-reset" onclick="resetStats()">Reset</button>
+        </div>
+
+        <div class="result-section">
+            <div id="resultContent" class="result-empty">
+                Click "Roll Once" or "Roll x10" to start rolling!
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-title">📊 Perfect Roll Statistics</div>
+            <div id="statsContent">
+                <div class="class-stat warrior">
+                    <div class="class-name">Warrior</div>
+                    <div class="stat-bar">
+                        <div class="bar-fill" style="width: 0%">0</div>
+                    </div>
+                    <div class="count" id="warrior-count">0</div>
+                </div>
+                <div class="class-stat magician">
+                    <div class="class-name">Magician</div>
+                    <div class="stat-bar">
+                        <div class="bar-fill" style="width: 0%">0</div>
+                    </div>
+                    <div class="count" id="magician-count">0</div>
+                </div>
+                <div class="class-stat bowman">
+                    <div class="class-name">Bowman</div>
+                    <div class="stat-bar">
+                        <div class="bar-fill" style="width: 0%">0</div>
+                    </div>
+                    <div class="count" id="bowman-count">0</div>
+                </div>
+                <div class="class-stat thief">
+                    <div class="class-name">Thief</div>
+                    <div class="stat-bar">
+                        <div class="bar-fill" style="width: 0%">0</div>
+                    </div>
+                    <div class="count" id="thief-count">0</div>
+                </div>
+            </div>
+            <div class="total-rolls" id="totalRolls">Total Perfect Rolls: 0</div>
+        </div>
+    </div>
+
+    <script>
+        const classColors = {
+            'Warrior': '#ff6b6b',
+            'Magician': '#4ecdc4',
+            'Bowman': '#ffe66d',
+            'Thief': '#95e1d3'
+        };
+
+        async function rollOnce() {
+            const btn = document.getElementById('rollBtn');
+            btn.disabled = true;
+            btn.textContent = '🎲 Rolling...';
+
+            try {
+                const response = await fetch('/api/roll', { method: 'POST' });
+                const data = await response.json();
+                displayResult(data.lastRoll);
+                updateStats(data.stats);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error rolling dice');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Roll Once';
+            }
+        }
+
+        async function rollX10() {
+            const btn = document.getElementById('rollX10Btn');
+            btn.disabled = true;
+            btn.textContent = '🎲 Rolling x10...';
+
+            try {
+                const response = await fetch('/api/roll-x10', { method: 'POST' });
+                const data = await response.json();
+                
+                // Display the last roll
+                if (data.rolls.length > 0) {
+                    displayResult(data.rolls[data.rolls.length - 1]);
+                }
+                updateStats(data.stats);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error rolling dice');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Roll x10';
+            }
+        }
+
+        function displayResult(roll) {
+            const color = classColors[roll.class] || '#667eea';
+            const resultContent = document.getElementById('resultContent');
+            
+            const statsHtml = `
+                <div class="result-content">
+                    <div class="result-stats">
+                        <div class="result-class" style="color: ${color}">
+                            ✨ ${roll.class} ✨
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">STR:</span>
+                            <span class="stat-value ${roll.stats.STR === 13 ? 'perfect' : ''}">${roll.stats.STR}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">DEX:</span>
+                            <span class="stat-value ${roll.stats.DEX === 13 ? 'perfect' : ''}">${roll.stats.DEX}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">INT:</span>
+                            <span class="stat-value ${roll.stats.INT === 13 ? 'perfect' : ''}">${roll.stats.INT}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">LUK:</span>
+                            <span class="stat-value">${roll.stats.LUK}</span>
+                        </div>
+                    </div>
+                    <div class="attempts">
+                        <span class="attempts-label">Attempts</span>
+                        <div class="attempts-value">${roll.attempts}</div>
+                    </div>
+                </div>
+            `;
+            
+            resultContent.innerHTML = statsHtml;
+        }
+
+        function updateStats(stats) {
+            const maxCount = Math.max(...Object.values(stats.byClass));
+            
+            Object.entries(stats.byClass).forEach(([className, count]) => {
+                const countElement = document.getElementById(`${className.toLowerCase()}-count`);
+                countElement.textContent = count;
+                
+                const classElement = document.querySelector(`.class-stat.${className.toLowerCase()}`);
+                const barFill = classElement.querySelector('.bar-fill');
+                const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                barFill.style.width = percentage + '%';
+                barFill.textContent = count;
+            });
+            
+            document.getElementById('totalRolls').textContent = `Total Perfect Rolls: ${stats.totalPerfectRolls}`;
+        }
+
+        async function resetStats() {
+            if (confirm('Are you sure you want to reset all statistics?')) {
+                try {
+                    const response = await fetch('/api/reset', { method: 'POST' });
+                    const data = await response.json();
+                    updateStats(data.stats);
+                    document.getElementById('resultContent').innerHTML = '<div class="result-empty">Statistics reset! Click "Roll Once" to start again.</div>';
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error resetting statistics');
+                }
+            }
+        }
+
+        // Load initial stats on page load
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                updateStats(stats);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
