@@ -74,11 +74,11 @@ class DiceRoller {
     }
 
     // Roll stats in random order
-    for (let i = 0; i < shuffledStats.length; i++) {
+    for (let i = 0; i < statNames.length; i++) {
       const statName = statNames[i];
       const statsLeft = statNames.length - i;
       
-      if (i === shuffledStats.length - 1) {
+      if (i === statNames.length - 1) {
         // Last stat gets whatever is left
         stats[statName] = remainingPool;
       } else {
