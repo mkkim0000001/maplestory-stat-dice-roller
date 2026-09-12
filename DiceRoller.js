@@ -68,12 +68,15 @@ class DiceRoller {
 
     // Randomize order to avoid any stat getting advantage
     const statNames = ['STR', 'DEX', 'INT', 'LUK'];
-    const shuffledStats = statNames.sort(() => Math.random() - 0.5);
+    for (let i = statNames.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [statNames[i], statNames[j]] = [statNames[j], statNames[i]];
+    }
 
     // Roll stats in random order
     for (let i = 0; i < shuffledStats.length; i++) {
-      const statName = shuffledStats[i];
-      const statsLeft = shuffledStats.length - i;
+      const statName = statNames[i];
+      const statsLeft = statNames.length - i;
       
       if (i === shuffledStats.length - 1) {
         // Last stat gets whatever is left
